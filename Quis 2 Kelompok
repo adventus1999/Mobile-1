@@ -1,0 +1,167 @@
+Coding Menu Utama
+package com.db;
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;	
+
+public class UtamaActivity extends Activity {
+	Button btn_Tampil, btn_Tambah;
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.utama);
+
+	btn_Tampil = (Button) findViewById(R.id.btnTampil); 
+	btn_Tambah = (Button) findViewById(R.id.btnTambah);
+
+	btn_Tampil.setOnClickListener(new OnClickListener() { 
+
+	public void onClick(View arg0) { 
+	Intent intent = new Intent(getApplicationContext(),
+		TampilActivity.class); 
+	startActivity(intent);
+		}
+	});
+
+
+
+
+
+btn_Tambah.setOnClickListener(new OnClickListener() {
+
+	public void onClick(View arg0) { 
+ Intent intent = new Intent(getApplicationContext(),
+		TambahActivity.class); 
+	startActivity(intent); 
+				 
+		}
+		}); 
+	}
+
+}
+
+
+Coding Menampilkan Halaman Lainnya
+package com.db;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
+public class TampilActivity extends Activity {
+	ListView lvData;
+	Cursor cursor;
+	DataHelper dbCenter;
+	String[] tampungData;
+	public static TampilActivity tampilActivity;
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.tampil);
+		tampilActivity = this;
+		dbCenter = new DataHelper(this);
+		tampilData();
+	}
+	public void tampilData() {
+		SQLiteDatabase db = dbCenter.getReadableDatabase();
+		cursor = db.rawQuery("SELECT * FROM tbl_user", null);
+		tampungData = new String[cursor.getCount()];
+		cursor.moveToFirst();
+		for (int i = 0; i < cursor.getCount(); i++) {
+			cursor.moveToPosition(i);
+			tampungData[i] = cursor.getString(0).toString();
+		}
+		lvData = (ListView) findViewById(R.id.listView1);
+		lvData.setAdapter(new ArrayAdapter<String>(this,
+
+	android.R.layout.simple_list_item_1, tampungData));
+		lvData.setSelected(true);
+		lvData.setOnItemClickListener(new OnItemClickListener() {
+public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,long arg3) {
+
+				
+
+final String selection = tampungData[arg2];
+final CharSequence[] dialogitem = { "Lihat Data", "Ubah Data","Hapus Data" };
+AlertDialog.Builder builder = new AlertDialog.Builder(
+	TampilActivity.this);
+	builder.setTitle("Pilihan"); 
+	builder.setItems(dialogitem,new DialogInterface.OnClickListener() {
+public void onClick(DialogInterface dialog, int item) {
+	switch (item) {
+		case 0: 
+Intent i = new Intent(getApplicationContext(),
+DetailActivity.class); 
+i.putExtra("USER_ID", selection);
+startActivity(i);
+break;
+	case 1:
+	// Case Ubah Data
+	break;
+	case 2: 
+	// Case Hapus Data
+	break;
+			}
+		}
+	});
+
+	builder.create().show();
+			}
+		});
+	}
+}
+
+
+
+
+Coding Halaman Penyimpanan data sqllite dan menampilkan ke listview	
+
+package com.db;
+
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+public class DataHelper extends SQLiteOpenHelper {
+
+ private static final String DatabaseName = "databaseku";
+ private static final int DatabaseVersion = 1;
+ 
+ public DataHelper(Context context) {
+  super(context, DatabaseName, null, DatabaseVersion);
+  // TODO Auto-generated constructor stub
+ }
+
+ @Override
+ public void onCreate(SQLiteDatabase arg0) {
+  String sql = "CREATE TABLE tbl_user(user_id text primary key," +
+    "password text null)";
+  arg0.execSQL(sql);
+  
+  sql = "INSERT INTO tbl_user VALUES('001', '123456')";
+  arg0.execSQL(sql);
+  
+  sql = "INSERT INTO tbl_user VALUES('002', '1234567')";
+  arg0.execSQL(sql);
+ }
+
+ @Override
+ public void onUpgrade(SQLiteDatabase arg0, int arg1, int arg2) {
+  // TODO Auto-generated method stub
+
+ }
+
+}
